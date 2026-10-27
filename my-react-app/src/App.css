@@ -1,0 +1,311 @@
+body {
+  background-color: #a68a6d;
+  color: #2b1d14;
+  margin: 0;
+  padding: 0;
+}
+#titleh1{
+  height: auto;
+  width: 100%;
+  text-align: center;
+  font-size: 40px;
+  background-color: white;
+  margin-top: 0%;
+
+
+}
+.header {
+  position: relative;
+}
+.user-btn{
+  background-color: white;
+  color: black;
+  margin-left: 40px;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  padding: 0%;
+  position: absolute;
+  right: 20px;
+  width: 50px;
+  transform: translate(-50%);
+  
+}
+.menu-btn{
+  background-color: white;
+  color: black;
+  margin-left: 40px;
+  
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  padding: 0%;
+  position: absolute;
+  right: 20px;
+  width: 50px;
+  margin: 0;
+   transform: translate(50%);
+
+}
+.location-btn{
+  position: absolute;
+  left: 80px;
+  top: 20px;
+  transform: translateY(-50%);
+  display: flex;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+}
+.search-btn{
+  position: absolute;
+  left: 40px;
+  top: 20px;
+  transform: translateY(-50%);
+  display: flex;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background-color: white;
+
+}
+.heart-btn{
+  position: absolute;
+  left: auto;
+  top: 20px;
+  transform: translateY(-50%);
+  display: flex;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background-color: white;
+}
+#titleh2 {
+  font-size: 30px;
+  text-align: center;
+}
+#watchlinks{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  max-width: 500px;
+
+}
+#imgr10 {
+  display: flex !important;
+  justify-content: center;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 30px 20px;
+}
+
+.watch-link {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 24px;
+  max-width: 750px;
+  min-height: 300px;
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  text-decoration: none;
+  color: #3b2a1a;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.watch-link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.watch-link img {
+  width: 260px !important;
+  height: 260px !important;
+  max-width: 260px !important;
+  flex: 0 0 260px !important;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.watch-link h3,p {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  font-size: 30px;
+  line-height: 1.7;
+  text-align: left;        /* بدل justify */
+  word-spacing: normal;
+}
+#watchlinks{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  max-width: 500px;
+
+}
+#imgl11 {
+  display: flex !important;
+  justify-content: center;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 30px 20px;
+}
+
+.lun-link {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 24px;
+  max-width: 750px;
+  min-height: 300px;
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  text-decoration: none;
+  color: #3b2a1a;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.lun-link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.lun-link img {
+  width: 260px !important;
+  height: 260px !important;
+  max-width: 260px !important;
+  flex: 0 0 260px !important;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.lun-link h3,p {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  font-size: 30px;
+  line-height: 1.7;
+  text-align: left;        /* بدل justify */
+  word-spacing: normal;
+}
+#sackochlink{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  max-width: 500px;
+
+}
+#imgsa11 {
+  display: flex !important;
+  justify-content: center;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 30px 20px;
+}
+
+.sackochlink {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 24px;
+  max-width: 750px;
+  min-height: 300px;
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  text-decoration: none;
+  color: #3b2a1a;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.sackochlink:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.sackochlink img {
+  width: 260px !important;
+  height: 260px !important;
+  max-width: 260px !important;
+  flex: 0 0 260px !important;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.sackochlink h3,p {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  font-size: 30px;
+  line-height: 1.7;
+  text-align: left;        /* بدل justify */
+  word-spacing: normal;
+}
+#casketlink{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  max-width: 500px;
+
+}
+#imgca11 {
+  display: flex !important;
+  justify-content: center;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 30px 20px;
+}
+
+.casketlink {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 24px;
+  max-width: 750px;
+  min-height: 300px;
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  text-decoration: none;
+  color: #3b2a1a;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.casketlink:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.casketlink img {
+  width: 260px !important;
+  height: 260px !important;
+  max-width: 260px !important;
+  flex: 0 0 260px !important;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.casketlink h3,p {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  font-size: 30px;
+  line-height: 1.7;
+  text-align: left;        /* بدل justify */
+  word-spacing: normal;
+}
