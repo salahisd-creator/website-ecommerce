@@ -1,14 +1,20 @@
 import React from 'react'
+import { usePrefs } from '../prefs';
 import { Link } from 'react-router-dom'
+import { useWatches } from '../useWatches'
+import { CardActions, cardStyles, useFavs } from '../ProductCard1';
+import { useAdmin } from '../useAdmin';
+import {AddProductCard} from '../AddProuductCard';
+import Skeleton from '../Skeleton';
 const styles = `
- .rxo-list {
+ .APP-11 {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 32px;
   padding: 30px 20px 60px;
 }
-a.lunt-card {
+a.AP-11{
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -20,15 +26,15 @@ a.lunt-card {
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   text-decoration: none;
-  color: #3b2a1a;
+  color: var(--c-d1);
   transition: transform 0.25s, box-shadow 0.25s;
   box-sizing: border-box;
 }
-a.lunt-card:hover {
+a.AP-11:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
-a.lunt-card img {
+a.AP-11 img {
   display: block;
   width: 220px;
   min-width: 220px;
@@ -37,7 +43,7 @@ a.lunt-card img {
   object-fit: cover;
   border-radius: 0;
 }
-.lunt-info {
+.AP-11-info {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -45,18 +51,44 @@ a.lunt-card img {
   padding: 20px 22px;
   text-align: center;
 }
-.lunt-info h3 { margin: 0 0 12px; font-size: 24px; color: #3b2a1a; }
-.lunt-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: #3b2a1a; }
+.AP-11-info h3 { margin: 0 0 12px; font-size: 24px; color: var(--c-d1); }
+.lunt-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: var(--c-d1); }
 @media (max-width: 560px) {
-  a.cs-card { flex-direction: column; }
-  a.cs-card img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
+  a.AP-11 { flex-direction: column; }
+  a.AP-11 img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
 }
 `;
 
 function AP() {
+  const { t } = usePrefs();
+  const { watches, loading } = useWatches("ap");
+  const { favs, toggleFav } = useFavs();
+    const isAdmin = useAdmin();
+
+  if (loading) return <Skeleton />;
+
   return (
-    <div>
-      vv sds
+    <div id='AP'>
+      <style>{styles}</style>
+      <style>{cardStyles}</style>
+      {isAdmin && (
+              <div className="sack-list">
+                <AddProductCard to="/add-product" />
+                </div>)}
+      {watches.map((w) => (
+        <div className="APP-11" key={w.id}>
+          <Link to={`/order/${w.slug}`} className="AP-11">
+            <img src={w.images?.[0]} alt={w.name} loading="lazy" decoding="async" />
+            <div className="AP-11-info">
+              <h3>{w.name}</h3>
+              <p>{w.bio}</p>
+              <CardActions price={w.price} id={w.slug} favs={favs} toggleFav={toggleFav} />
+              
+            </div>
+          </Link>
+        </div>
+      ))}
+      <div style={{ height: 60 }} />
     </div>
   )
 }

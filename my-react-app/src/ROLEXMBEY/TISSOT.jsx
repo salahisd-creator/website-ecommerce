@@ -1,5 +1,11 @@
 import React from 'react'
+import { usePrefs } from '../prefs';
 import { Link } from 'react-router-dom'
+import { useWatches } from '../useWatches'
+import { CardActions, cardStyles, useFavs } from '../ProductCard1';
+import { useAdmin } from '../useAdmin';
+import {AddProductCard} from '../AddProuductCard'
+import Skeleton from '../Skeleton';
 const styles = `
  .tpp11 {
   display: flex;
@@ -20,7 +26,7 @@ a.tp112 {
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   text-decoration: none;
-  color: #3b2a1a;
+  color: var(--c-d1);
   transition: transform 0.25s, box-shadow 0.25s;
   box-sizing: border-box;
 }
@@ -45,8 +51,8 @@ a.tp112 img {
   padding: 20px 22px;
   text-align: center;
 }
-.tp12-info h3 { margin: 0 0 12px; font-size: 24px; color: #3b2a1a; }
-.tp12-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: #3b2a1a; }
+.tp12-info h3 { margin: 0 0 12px; font-size: 24px; color: var(--c-d1); }
+.tp12-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: var(--c-d1); }
 @media (max-width: 560px) {
   a.tp112 { flex-direction: column; }
   a.tp112 img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
@@ -54,18 +60,37 @@ a.tp112 img {
 `;
 
 function TISSOT() {
+  const { t } = usePrefs();
+  const { watches, loading } = useWatches("tissot");
+  const { favs, toggleFav } = useFavs();
+  const isAdmin = useAdmin();
+
+
+  if (loading) return <Skeleton />;
+  
   return (
     <div id='TISSOT'>
+
       <style>{styles}</style>
-      <div  className="tpp11">
-              <Link to="/order/TISSOT1" className="tp112">
-                <img src="/ROLEXM/TISSOTI.jpg" alt="YACHTNOIEI" />
-                <div className="tp12-info">
-                  <h3>TISSOT</h3>
-                  <p>COLOR: BLACK, high quality and elegant design.</p>
-                </div>
-              </Link>
+      <style>{cardStyles}</style>
+      {isAdmin && (
+      <div className="sack-list">
+       <AddProductCard to="/add-product" />
+      </div>)}
+      {watches.map((w) => (
+        <div className="tpp11 " key={w.id}>
+          <Link to={`/order/${w.slug}`} className="tp112">
+            <img src={w.images?.[0]} alt={w.name} loading="lazy" decoding="async" />
+            <div className="tp12-info">
+              <h3>{w.name}</h3>
+              <p>{w.bio}</p>
+              <CardActions price={w.price} id={w.slug} favs={favs} toggleFav={toggleFav} />
+
             </div>
+          </Link>
+        </div>
+      ))}
+      <div style={{ height: 60 }} />
     </div>
   )
 }

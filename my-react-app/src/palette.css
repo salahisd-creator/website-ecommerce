@@ -1,0 +1,27 @@
+/* =========================================================
+   palette.css  ←  src/palette.css  (يُستورد بعد theme.css)
+   ألوان المتجر: النهار = أزرق وفضي · الليل = أسود وذهبي
+   غيّر الألوان من هنا فقط.
+   ========================================================= */
+:root {
+  --c-pf: #FFFFFF; --c-b1: #1F3A68; --c-b2: #6C8FD0; --c-bt: #FFFFFF;
+  --c-h1: #1B3260; --c-h2: #0E1B33; --c-h3: #08101F; --c-g1-rgb: 174 185 204;
+  --c-d1: #1F3A68;  --c-d0: #12203A;  --c-k: #12203A;   --c-bk: #0E1B33;
+  --c-top: #0E1B33; --c-deep: #08101F; --c-card: #16294D; --c-line: #2C4A7C;
+  --c-g2: #FFFFFF;  --c-g1: #AEB9CC;  --c-g0: #4F74B8;
+  --c-cream: #FFFFFF; --c-cream2: #DDE4EF; --c-tan: #DCE4F0;
+  --c-ink2: #12203A; --c-ink3: #3A4A66; --c-ink4: #5B6B88;
+  --st-top: #EAF0F8; --st-deep: #CBD6E6; --st-card: #FFFFFF; --st-line: #D3DBE8;
+  --st-ink: #12203A; --st-gold: #1F3A68; --st-btn: #1F3A68; --st-btn-ink: #FFFFFF;
+}
+html[data-theme="dark"] {
+  --c-pf: #1E1E20; --c-b1: #E3C677; --c-b2: #A98B3A; --c-bt: #0F0F10;
+  --c-h1: #2A230F; --c-h2: #141414; --c-h3: #0A0A0A; --c-g1-rgb: 201 162 75;
+  --c-d1: #1C1C1E;  --c-d0: #0F0F10;  --c-k: #0F0F10;   --c-bk: #0F0F10;
+  --c-top: #161617; --c-deep: #070707; --c-card: #1A1A1C; --c-line: #34312A;
+  --c-g2: #E3C677;  --c-g1: #C9A24B;  --c-g0: #A98B3A;
+  --c-cream: #F5F1E8; --c-cream2: #E4DDCC; --c-tan: #C9A24B;
+  --c-ink2: #F5F1E8; --c-ink3: #BDB7A8; --c-ink4: #A9A397;
+  --st-top: #161617; --st-deep: #070707; --st-card: #1A1A1C; --st-line: #34312A;
+  --st-ink: #F5F1E8; --st-gold: #C9A24B; --st-btn: #C9A24B; --st-btn-ink: #0F0F10;
+}

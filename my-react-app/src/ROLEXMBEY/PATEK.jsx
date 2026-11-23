@@ -1,12 +1,21 @@
 import React from 'react'
+import { usePrefs } from '../prefs';
 import { Link } from 'react-router-dom'
+import { useWatches } from '../useWatches'
+import { CardActions, cardStyles, useFavs } from '../ProductCard1';
+import { useAdmin } from '../useAdmin';
+import {AddProductCard} from '../AddProuductCard'
+import Skeleton from '../Skeleton';
+
+
+
 const styles = `
  .ppp-11 {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 32px;
-  padding: 30px 20px 60px;
+  padding: 30px 20px 0;
 }
 a.pp-11 {
   display: flex;
@@ -20,7 +29,7 @@ a.pp-11 {
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   text-decoration: none;
-  color: #3b2a1a;
+  color: var(--c-d1);
   transition: transform 0.25s, box-shadow 0.25s;
   box-sizing: border-box;
 }
@@ -45,38 +54,45 @@ a.pp-11 img {
   padding: 20px 22px;
   text-align: center;
 }
-.PP11-info h3 { margin: 0 0 12px; font-size: 24px; color: #3b2a1a; }
-.PP11-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: #3b2a1a; }
+.PP11-info h3 { margin: 0 0 12px; font-size: 24px; color: var(--c-d1); }
+.PP11-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: var(--c-d1); }
 @media (max-width: 560px) {
   a.pp-11 { flex-direction: column; }
   a.pp-11 img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
 }
 `;
 
-
 function PATEK() {
+  const { t } = usePrefs();
+  const { watches, loading } = useWatches("patek");
+  const { favs, toggleFav } = useFavs();
+    const isAdmin = useAdmin();
+
+  if (loading) return <Skeleton />;
+
   return (
     <div id='PATEK'>
-            <style>{styles}</style>
-            <div  className="ppp-11">
-              <Link to="/order/AQUANAUT1" className="pp-11">
-                <img src="/ROLEXM/NUTINOIR.jpg" alt="NUTINOIR" />
-                <div className="PP11-info">
-                  <h3>PATEK AQUANAUT </h3>
-                  <p>COLOR: BLACK UND SILVER, high quality and elegant design.</p>
-                </div>
-              </Link>
+      <style>{styles}</style>
+      <style>{cardStyles}</style>
+      {isAdmin && (
+       <div className="sack-list">
+        <AddProductCard to="/add-product" />
+         </div>)}
+      {watches.map((w) => (
+        <div className="ppp-11" key={w.id}>
+          <Link to={`/order/${w.slug}`} className="pp-11">
+            <img src={w.images?.[0]} alt={w.name} loading="lazy" decoding="async" />
+            <div className="tp12-info">
+              <h3>{w.name}</h3>
+              <p>{w.bio}</p>
+              <CardActions price={w.price} id={w.slug} favs={favs} toggleFav={toggleFav} />
+              
+              
             </div>
-            <div  className="ppp-11">
-              <Link to="/order/NAUTILUS1" className="pp-11">
-                <img src="/ROLEXM/PATEKNUTEBLUE.jpg" alt="NUTINOIR" />
-                <div className="PP11-info">
-                  <h3>PATEK NAUTILUS </h3>
-                  <p>COLOR: BLUE, high quality and elegant design.</p>
-                </div>
-              </Link>
-            </div>
-            
+          </Link>
+        </div>
+      ))}
+      <div style={{ height: 60 }} />
     </div>
   )
 }

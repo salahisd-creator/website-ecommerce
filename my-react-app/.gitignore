@@ -21,3 +21,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# أسرار وبيانات الزبائن: لا تُرفع أبداً إلى GitHub
+.env
+.env.*
+/data
+*.pem
+*.key

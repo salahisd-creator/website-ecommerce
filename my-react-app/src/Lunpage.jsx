@@ -1,14 +1,19 @@
 import React from 'react'
+import { usePrefs } from './prefs';
 import { Link } from 'react-router-dom';
+import { useWatches } from './useWatches';
+import { CardActions, cardStyles, useFavs } from './ProductCard1';
+import { useAdmin } from './useAdmin';
+import {AddProductCard} from './AddProuductCard'
+import Skeleton from './Skeleton';
 
-
- const styles = `
- .watchty-list {
+/*const styles = `
+.watchty-list {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 32px;
-  padding: 30px 20px 60px;
+  padding: 30px 20px 0;
 }
 a.watchty-card {
   display: flex;
@@ -22,7 +27,7 @@ a.watchty-card {
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   text-decoration: none;
-  color: #3b2a1a;
+  color: var(--c-d1);
   transition: transform 0.25s, box-shadow 0.25s;
   box-sizing: border-box;
 }
@@ -37,7 +42,6 @@ a.watchty-card img {
   max-width: 220px;
   height: auto;
   object-fit: cover;
-  border-radius: 0;
 }
 .watchty-info {
   flex: 1;
@@ -47,126 +51,42 @@ a.watchty-card img {
   padding: 20px 22px;
   text-align: center;
 }
-.watchty-info h3 { margin: 0 0 12px; font-size: 24px; color: #3b2a1a; }
-.watchty-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: #3b2a1a; }
+.watchty-info h3 { margin: 0 0 12px; font-size: 24px; color: var(--c-d1); }
+.watchty-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: var(--c-d1); }
 @media (max-width: 560px) {
-  a.cs-card { flex-direction: column; }
-  a.cs-card img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
+  a.watchty-card { flex-direction: column; }
+  a.watchty-card img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
 }
-`;
-function Lunpage (params) {
+`;*/
+
+function Lunpage() {
+  const { t } = usePrefs();
+  const { watches, loading} = useWatches("glasses");
+  const { favs, toggleFav } = useFavs();
+      const isAdmin = useAdmin();
+
+  if (loading) return <Skeleton />;
+
   return (
     <div>
-      <style>{styles}</style>
-      <div className="watchty-list">
-        <Link to="/order/LOUISVUITON" className="watchty-card">
-          <img src="/luneimags/lvlun1.jpg" alt="LOUISVUITON" />
-          <div className="watchty-info">
-            <h3>LOUISVUITON</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/CARIRA" className="watchty-card">
-          <img src="/luneimags/carira.jpg" alt="carira" />
-          <div className="watchty-info">
-            <h3>CARIRA</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/BOTTEGA" className="watchty-card">
-          <img src="/luneimags/bottega.jpg" alt="bottega" />
-          <div className="watchty-info">
-            <h3>BOTTEGA VENTA</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/ZENGA" className="watchty-card">
-          <img src="/luneimags/zenga.jpg" alt="zenga" />
-          <div className="watchty-info">
-            <h3>ZENGA</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/CARTIERL1" className="watchty-card">
-          <img src="/luneimags/cartierl11.jpg" alt="cartier1" />
-          <div className="watchty-info">
-            <h3>CARTIER</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/CARTIERL2" className="watchty-card">
-          <img src="/luneimags/cartierl2.jpg" alt="cartier" />
-          <div className="watchty-info">
-            <h3>CARTIER</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/CARTIERL3" className="watchty-card">
-          <img src="/luneimags/cartierl3.jpg" alt="cartier" />
-          <div className="watchty-info">
-            <h3>CARTIER</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/BRUNELLO" className="watchty-card">
-          <img src="/luneimags/brunello.jpg" alt="brunello" />
-          <div className="watchty-info">
-            <h3>BRUNELLO CUCINELLI</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/BALMAIN" className="watchty-card">
-          <img src="/luneimags/balmain.jpg" alt="balmain" />
-          <div className="watchty-info">
-            <h3>BALMAIN</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/lorobiana" className="watchty-card">
-          <img src="/luneimags/LOROBIANA.jpg" alt="lorobiana" />
-          <div className="watchty-info">
-            <h3>LORO BIANA</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/MAYBACH" className="watchty-card">
-          <img src="/luneimags/maybach.jpg" alt="maybach" />
-          <div className="watchty-info">
-            <h3>MAYBACH</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="watchty-list">
-        <Link to="/order/GAZAL" className="watchty-card">
-          <img src="/luneimags/gazal.jpg" alt="gazal" />
-          <div className="watchty-info">
-            <h3>GAZAL</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
       
+      <style>{cardStyles}</style>
+      {isAdmin && (
+       <div className="sack-list">
+        <AddProductCard to="/add-product" />
+        </div>)}
+      {watches.map((w) => (
+        <div className="watchty-list" key={w.id}>
+          <Link to={`/order/${w.slug}`} className="watchty-card">
+            <img src={w.images?.[0]} alt={w.name} loading="lazy" decoding="async" />
+            <div className="watchty-info">
+              <h3>{w.name}</h3>
+              <p>{w.bio}</p>
+             <CardActions price={w.price} id={w.slug} favs={favs} toggleFav={toggleFav} />
+            </div>
+          </Link>
+        </div>
+      ))}
     </div>
   )
 }

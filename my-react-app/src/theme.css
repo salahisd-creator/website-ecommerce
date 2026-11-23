@@ -1,0 +1,167 @@
+/* =========================================================
+   theme.css  ←  src/theme.css
+   الوضع الداكن/الفاتح + عناصر الأزرار (المظهر واللغة).
+   الوضع الفاتح = ألوان المتجر الحالية في App.css. الداكن يُطبَّق عند html[data-theme="dark"].
+   ========================================================= */
+:root {
+  --st-ink: var(--c-d0);
+  --st-gold: var(--c-g0);
+  --st-btn: var(--c-d1);
+  --st-btn-ink: var(--c-g2);
+}
+
+html { transition: background-color .3s; }
+body { transition: color .3s; }
+
+/* ---------- اتجاه اللغة ---------- */
+html[data-lang="ar"] .pp-root,
+html[data-lang="ar"] .gh,
+html[data-lang="ar"] .cats,
+html[data-lang="ar"] .search-page,
+html[data-lang="ar"] .fav-page,
+html[data-lang="ar"] .sm-panel,
+html[data-lang="ar"] .isd-info { direction: rtl; }
+
+/* ---------- أزرار المظهر واللغة (أسفل كل الصفحات) ---------- */
+.prefs { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 28px; margin: 6px auto 8px; padding: 0 20px; }
+.prefs-row { display: flex; align-items: center; gap: 12px; color: var(--c-g2); font-weight: 700; font-size: 14px; }
+
+.isd-tgl {
+  position: relative; width: 72px; height: 36px; border-radius: 99px; padding: 0; cursor: pointer;
+  border: 1px solid rgba(232,197,143,.55); background: linear-gradient(180deg, var(--c-g2), var(--c-g1));
+  display: flex; align-items: center; justify-content: space-between; box-shadow: inset 0 2px 5px rgba(0,0,0,.18);
+  transition: background .35s, border-color .35s; flex: none;
+}
+.isd-tgl.dark { background: linear-gradient(180deg, #1d2338, #0e1220); border-color: #5b6aa8; }
+.isd-tgl-ic { width: 36px; height: 36px; display: grid; place-items: center; z-index: 1; transition: color .3s, opacity .3s; }
+.isd-tgl-ic.sun { color: var(--c-g2); opacity: 0; }
+.isd-tgl-ic.moon { color: #cfd6ff; opacity: .55; }
+.isd-tgl:not(.dark) .isd-tgl-ic.sun { opacity: 0; }
+.isd-tgl:not(.dark) .isd-tgl-ic.moon { color: var(--c-g0); opacity: .55; }
+.isd-tgl.dark .isd-tgl-ic.sun { color: #cfd6ff; opacity: .55; }
+.isd-tgl.dark .isd-tgl-ic.moon { opacity: 0; }
+.isd-tgl-knob {
+  position: absolute; top: 3px; left: 3px; width: 28px; height: 28px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--c-g2), #f0b429); box-shadow: 0 2px 6px rgba(0,0,0,.35);
+  transition: transform .35s cubic-bezier(.3,.9,.3,1), background .35s;
+}
+.isd-tgl.dark .isd-tgl-knob { transform: translateX(36px); background: radial-gradient(circle at 35% 30%, #fff, #c5cdf2); }
+
+.isd-tgl:focus-visible, .lg button:focus-visible { outline: 2px solid var(--c-g2); outline-offset: 3px; }
+
+.lg { display: inline-flex; padding: 3px; border-radius: 99px; border: 1px solid rgba(232,197,143,.55); background: rgba(255,255,255,.06); }
+.lg button { all: unset; box-sizing: border-box; cursor: pointer; padding: 6px 14px; border-radius: 99px; font-weight: 700; font-size: 13.5px; color: var(--c-g2); transition: background .2s, color .2s; }
+.lg button.on { background: var(--c-g2); color: var(--c-d0); }
+.lg button:not(.on):hover { background: rgba(232,197,143,.16); }
+
+/* داخل القائمة الجانبية */
+.prefs.in-menu { flex-direction: column; align-items: stretch; gap: 10px; margin: 0 0 6px; padding: 0; }
+.prefs.in-menu .prefs-row { justify-content: space-between; color: inherit; background: rgba(201,162,126,.18); border-radius: 14px; padding: 8px 12px; font-size: 15px; }
+.prefs.in-menu .lg { border-color: rgba(120,90,50,.4); background: rgba(255,255,255,.5); }
+.prefs.in-menu .lg button { color: var(--c-d1); padding: 5px 10px; font-size: 12.5px; }
+.prefs.in-menu .lg button.on { background: var(--c-bk); color: var(--c-g2); }
+
+/* =====================  الوضع الداكن  ===================== */
+html[data-theme="dark"] {
+  --st-top: var(--c-top);
+  --st-deep: var(--c-deep);
+  --st-card: var(--c-card);
+  --st-line: var(--c-line);
+  --st-ink: var(--c-ink2);
+  --st-gold: var(--c-g1);
+  --st-btn: var(--c-tan);
+  --st-btn-ink: var(--c-bk);
+  background: var(--c-deep);
+}
+html[data-theme="dark"] body { color: var(--c-ink2); }
+
+/* الهيدر والبحث */
+html[data-theme="dark"] #titleh1 { color: var(--c-ink2); box-shadow: 0 1px 12px rgba(0,0,0,.5); }
+html[data-theme="dark"] #titleh1 .menu-btn,
+html[data-theme="dark"] #titleh1 .heart-btn,
+html[data-theme="dark"] #titleh1 .user-btn,
+html[data-theme="dark"] #titleh1 .location-btn,
+html[data-theme="dark"] #titleh1 a { color: var(--c-ink2); }
+html[data-theme="dark"] .isd-search__field { color: var(--c-ink4); }
+html[data-theme="dark"] .isd-search__field input { color: var(--c-ink2); }
+html[data-theme="dark"] .isd-search__field input::placeholder { color: var(--c-ink4); }
+
+/* الرئيسية */
+html[data-theme="dark"] .gh { color: var(--c-ink2); }
+html[data-theme="dark"] .gh-sub,
+html[data-theme="dark"] .gh-product__price s { color: var(--c-ink4); }
+html[data-theme="dark"] .gh-more__btn { color: var(--c-g1); border-color: var(--c-g1); }
+html[data-theme="dark"] .gh-more__btn:hover { background: var(--c-g1); color: var(--c-bk); }
+
+/* البحث */
+html[data-theme="dark"] .search-card img { background: #1d160f; }
+html[data-theme="dark"] .search-card span { color: var(--c-g1); }
+
+/* القائمة الجانبية */
+html[data-theme="dark"] .sm-panel { background: linear-gradient(180deg, var(--c-top), #120d09); color: var(--c-ink2); box-shadow: -18px 0 40px rgba(0,0,0,.6); }
+html[data-theme="dark"] .sm-head { background: #0b0805; }
+html[data-theme="dark"] .sm-sec { color: var(--c-g0); }
+html[data-theme="dark"] .sm-item { color: var(--c-ink2); }
+html[data-theme="dark"] .sm-item:hover { background: rgba(255,255,255,.07); }
+html[data-theme="dark"] .sm-item.on { background: var(--c-tan); color: var(--c-bk); }
+html[data-theme="dark"] .sm-ic { background: rgba(201,162,126,.18); color: var(--c-g1); }
+html[data-theme="dark"] .sm-item.on .sm-ic { background: var(--c-bk); color: var(--c-g1); }
+html[data-theme="dark"] .sm-ic.wa { background: rgba(37,211,102,.16); color: #4ade80; }
+html[data-theme="dark"] .sm-foot { background: rgba(0,0,0,.25); border-top-color: #3d2f20; color: var(--c-ink3); }
+html[data-theme="dark"] .sm-bd { background: var(--c-tan); color: var(--c-bk); }
+html[data-theme="dark"] .prefs.in-menu .prefs-row { background: rgba(255,255,255,.06); }
+html[data-theme="dark"] .prefs.in-menu .lg { background: rgba(255,255,255,.06); border-color: rgba(232,197,143,.4); }
+html[data-theme="dark"] .prefs.in-menu .lg button { color: var(--c-g1); }
+html[data-theme="dark"] .prefs.in-menu .lg button.on { background: var(--c-tan); color: var(--c-bk); }
+
+/* الفوتر */
+html[data-theme="dark"] .footer { background: linear-gradient(180deg, #1a130d, #080605); }
+
+/* صفحة الطلب */
+html[data-theme="dark"] .pp-root {
+  --bg: var(--c-top); --bg-deep: var(--c-deep); --ink: var(--c-ink2); --ink-soft: var(--c-ink3); --gold: var(--c-g1); --gold-bright: var(--c-g2);
+  --glass: rgba(255,255,255,.07); --field: rgba(255,255,255,.08); --error: #ff9a85;
+  --btn: var(--c-tan); --btn-ink: var(--c-bk); --line: rgba(243,230,204,.22); --pop: var(--c-card); --bar: var(--c-bk);
+}
+html[data-theme="dark"] .pp-root select option { background: var(--c-card); color: var(--c-ink2); }
+html[data-theme="dark"] .pp-chat a { border-color: var(--c-bk); }
+
+/* الرئيسية: عناصر كانت سوداء ثابتة */
+html[data-theme="dark"] .gh-trust__item { background: linear-gradient(160deg, rgba(212,175,55,.16), rgba(255,255,255,.02) 60%); box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+html[data-theme="dark"] .gh-trust__item b { color: #F3E3A3; }
+html[data-theme="dark"] .gh-trust__item small { color: #d6d6d6; }
+html[data-theme="light"] .gh-trust__item { border-color: rgba(31,58,95,.35); background: linear-gradient(160deg, rgba(31,58,95,.08), rgba(192,198,210,.14)); }
+html[data-theme="dark"] .gh-btn-dark { background: var(--c-tan); color: var(--c-bk); }
+html[data-theme="dark"] .gh-product__img { background: var(--c-card); }
+html[data-theme="dark"] .gh-title::after { background: var(--c-g1); }
+
+/* روابط الهيدر ترث لون الأيقونة (لا الأزرق الافتراضي للروابط) */
+#titleh1 .user-btn a, #titleh1 .heart-btn a { color: inherit; }
+#titleh1 .menu-btn, #titleh1 .heart-btn, #titleh1 .user-btn, #titleh1 .location-btn { color: #222; }
+html[data-theme="dark"] #titleh1 .menu-btn,
+html[data-theme="dark"] #titleh1 .heart-btn,
+html[data-theme="dark"] #titleh1 .user-btn,
+html[data-theme="dark"] #titleh1 .location-btn { color: var(--c-ink2); }
+
+/* لغات اليسار-لليمين: حقول الاستمارة */
+html:not([data-lang="ar"]) .pp-field label { right: auto; left: 14px; }
+html:not([data-lang="ar"]) .pp-hint { text-align: left; }
+
+/* ---- بطاقات المنتجات وقوائم الماركات (ألوان نص كانت ثابتة داكنة) ---- */
+html[data-theme="dark"] a[href^="/order/"],
+html[data-theme="dark"] a[href^="/order/"] > div > :is(h1, h2, h3, h4),
+html[data-theme="dark"] a[href^="/order/"] > div > p,
+html[data-theme="dark"] :is(a.watchty-card, a.cs-card, a.cap-22, a.cap-11, a.tp112, a.om-11, a.pp-11, a.AP-11, a.bossp2, a.cartierp2, .rp-12),
+html[data-theme="dark"] [class*="-info"] :is(h3, p),
+html[data-theme="dark"] :is(.bossp3, .cartierp3) :is(h3, p),
+html[data-theme="dark"] :is(.bp, .bp-card, .add-card, .add-card-title) { color: var(--c-ink2); }
+html[data-theme="dark"] :is(a.watchty-card, a.cs-card, a.cap-22, a.cap-11, a.tp112, a.om-11, a.pp-11, a.AP-11, a.bossp2, a.cartierp2, .rp-12) { background: rgba(255,255,255,.06); }
+html[data-theme="dark"] .bp-ring span { background: var(--c-deep); }
+html[data-theme="dark"] .bp-card:hover { border-color: var(--c-g1); }
+
+/* ===== زر السلة في الهيدر ===== */
+#titleh1 .cart-btn{position:absolute;top:50%;transform:translateY(-50%);left:auto;right:108px;width:44px;height:44px;margin:0;padding:0;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;color:#222}
+#titleh1 .cart-btn svg{width:26px;height:26px}
+#titleh1 .cart-btn a{display:grid;place-items:center;color:inherit;position:relative}
+#titleh1 .cart-badge{position:absolute;top:-6px;inset-inline-end:-8px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#b3341f;color:#fff;font:700 11px/18px Tahoma,sans-serif;text-align:center}
+html[data-theme="dark"] #titleh1 .cart-btn{color:var(--c-cream2)}

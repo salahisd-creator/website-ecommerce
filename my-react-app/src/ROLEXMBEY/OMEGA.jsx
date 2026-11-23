@@ -1,5 +1,11 @@
 import React from 'react'
+import { usePrefs } from '../prefs';
 import { Link } from 'react-router-dom'
+import { useWatches } from '../useWatches'
+import { CardActions, cardStyles, useFavs } from '../ProductCard1';
+import { useAdmin } from '../useAdmin';
+import {AddProductCard} from '../AddProuductCard'
+import Skeleton from '../Skeleton';
 const styles = `
  .omm-11 {
   display: flex;
@@ -20,7 +26,7 @@ a.om-11 {
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   text-decoration: none;
-  color: #3b2a1a;
+  color: var(--c-d1);
   transition: transform 0.25s, box-shadow 0.25s;
   box-sizing: border-box;
 }
@@ -45,8 +51,8 @@ a.om-11 img {
   padding: 20px 22px;
   text-align: center;
 }
-.om-11-info h3 { margin: 0 0 12px; font-size: 24px; color: #3b2a1a; }
-.om-11-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: #3b2a1a; }
+.om-11-info h3 { margin: 0 0 12px; font-size: 24px; color: var(--c-d1); }
+.om-11-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: var(--c-d1); }
 @media (max-width: 560px) {
   a.om-11-card { flex-direction: column; }
   a.om-11-card img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
@@ -55,18 +61,35 @@ a.om-11 img {
 
 
 function OMEGA() {
+  const { t } = usePrefs();
+  const { watches, loading } = useWatches("omega");
+  const { favs, toggleFav } = useFavs();
+  const isAdmin = useAdmin();
+
+  if (loading) return <Skeleton />;
+
   return (
     <div id='OMEGA'>
-                  <style>{styles}</style>
-                  <div  className="omm-11">
-                    <Link to="/order/SEAMASTER1" className="om-11">
-                      <img src="/ROLEXM/OMEGAORAN.jpg" alt="NUTINOIR" />
-                      <div className="om-11-info">
-                        <h3>PATEK SEAMASTER DIVER </h3>
-                        <p>COLOR: ORANGE, high quality and elegant design.</p>
-                      </div>
-                    </Link>
-                  </div>
+      <style>{styles}</style>
+      <style>{cardStyles}</style>
+      {isAdmin && (
+                    <div className="sack-list">
+                      <AddProductCard to="/add-product" />
+                      </div>)}
+      {watches.map((w) => (
+        <div className="omm-11" key={w.id}>
+          <Link to={`/order/${w.slug}`} className="om-11">
+            <img src={w.images?.[0]} alt={w.name} loading="lazy" decoding="async" />
+            <div className="om-11-info">
+              <h3>{w.name}</h3>
+              <p>{w.bio}</p>
+              <CardActions price={w.price} id={w.slug} favs={favs} toggleFav={toggleFav} />
+              
+            </div>
+          </Link>
+        </div>
+      ))}
+      <div style={{ height: 60 }} />
     </div>
   )
 }

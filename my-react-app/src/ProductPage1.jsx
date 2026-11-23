@@ -1,670 +1,272 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { PRODUCTS } from './data';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useProduct } from './useProduct';
+import { usePrefs } from './prefs';
+import { useCart } from './cartStore';
+import { supabase } from './supabaseClient';
+import { track } from './pixels';
+import ProductReviews from './ProductReviews';
+import { useSeo } from './seo';
+import { CheckoutBar, CheckoutCard, PHONE, ppStyles, useCheckout } from './Checkout';
+import Skeleton from './Skeleton';
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbz6uTriEA5WRdmxDBgQse7BiDC04me_JU32lJibGR2iiR62XB8ukcDn68HeyEu2cFQ/exec";
+function Gallery({ images, name }) {
+  const { t } = usePrefs();
+  const list = (images || []).filter(Boolean);
+  const n = list.length;
+  const [idx, setIdx] = useState(0);
+  const [hold, setHold] = useState(false);
+  const startX = useRef(null);
+  const swiped = useRef(false);
+  const [zoom, setZoom] = useState(false);
+  const [big, setBig] = useState(false);
 
-const PHONE = '213774812167';
+  useEffect(() => {
+    if (!zoom) return undefined;
+    const k = (e) => {
+      if (e.key === 'Escape') setZoom(false);
+      if (e.key === 'ArrowLeft') setIdx((i) => (i + 1) % n);
+      if (e.key === 'ArrowRight') setIdx((i) => (i - 1 + n) % n);
+    };
+    document.addEventListener('keydown', k);
+    const old = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', k); document.body.style.overflow = old; };
+  }, [zoom, n]);
 
-const WILAYAS = [
-  'أدرار','الشلف','الأغواط','أم البواقي','باتنة','بجاية','بسكرة','بشار','البليدة','البويرة',
-  'تمنراست','تبسة','تلمسان','تيارت','تيزي وزو','الجزائر','الجلفة','جيجل','سطيف','سعيدة',
-  'سكيكدة','سيدي بلعباس','عنابة','قالمة','قسنطينة','المدية','مستغانم','المسيلة','معسكر','ورقلة',
-  'وهران','البيض','إليزي','برج بوعريريج','بومرداس','الطارف','تندوف','تيسمسيلت','الوادي','خنشلة',
-  'سوق أهراس','تيبازة','ميلة','عين الدفلى','النعامة','عين تموشنت','غرداية','غليزان','تيميمون',
-  'برج باجي مختار','أولاد جلال','بني عباس','عين صالح','عين قزام','تقرت','جانت','المغير','المنيعة',
-];
+  // تغيير تلقائي كل 4 ثوانٍ، يتوقف أثناء اللمس
+  useEffect(() => {
+    if (n < 2 || hold) return;
+    const t = setTimeout(() => setIdx((i) => (i + 1) % n), 4000);
+    return () => clearTimeout(t);
+  }, [idx, n, hold]);
 
-const DELIVERY = { home: 800, office: 500 };
+  if (n === 0) return <div className="pp-stage" />;
 
-const fmt = (n) => Number(n).toLocaleString('en-US') + ' دج';
+  const go = (i) => setIdx(((i % n) + n) % n);
 
-const styles = `
-.pp-root {
-  --bg: #c9a27e;
-  --bg-deep: #b78d68;
-  --ink: #3b2a1a;
-  --ink-soft: #6b5239;
-  --gold: #8a6508;
-  --gold-bright: #f5d98b;
-  --glass: rgba(255,255,255,.45);
-  --field: rgba(255,255,255,.82);
-  --error: #b3341f;
-  --btn: #3b2a1a;
-  --btn-ink: #f5d98b;
+  const onTouchStart = (e) => {
+    startX.current = e.touches[0].clientX;
+    setHold(true);
+  };
+  const onTouchEnd = (e) => {
+    if (startX.current !== null) {
+      const dx = e.changedTouches[0].clientX - startX.current;
+      if (Math.abs(dx) > 40) { swiped.current = true; go(dx < 0 ? idx + 1 : idx - 1); }
+    }
+    startX.current = null;
+    setHold(false);
+  };
 
-  background: linear-gradient(180deg, var(--bg), var(--bg-deep));
-  color: var(--ink);
-  min-height: 100vh;
-  direction: rtl;
-  font-family: Tahoma, "Segoe UI", system-ui, sans-serif;
+  return (
+    <div className="pp-gal">
+      <div
+        className="pp-stage"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={() => { startX.current = null; setHold(false); }}
+        onClick={() => { if (swiped.current) { swiped.current = false; return; } setBig(false); setZoom(true); }}
+        style={{ cursor: 'zoom-in' }}
+      >
+        {list.map((src, i) => (
+          <img
+            key={src + i}
+            src={src}
+            alt={`${name} ${i + 1}`}
+            className={i === idx ? 'on' : ''}
+            draggable={false}
+          />
+        ))}
+
+        {n > 1 && (
+          <>
+            <button type="button" className="pp-arrow prev" aria-label={t('السابق')} onClick={() => go(idx - 1)}>›</button>
+            <button type="button" className="pp-arrow next" aria-label={t('التالي')} onClick={() => go(idx + 1)}>‹</button>
+          </>
+        )}
+      </div>
+
+      {zoom && (
+        <div className="pp-zoom" role="dialog" aria-modal="true" aria-label={t('تكبير الصورة')}>
+          <div className="pp-zoom-bg" style={{ backgroundImage: `url(${list[idx]})` }} />
+          <button type="button" className="pp-zoom-x" aria-label={t('إغلاق')} onClick={() => setZoom(false)}>✕</button>
+          {n > 1 && <button type="button" className="pp-zoom-a prev" aria-label={t('السابق')} onClick={() => { setBig(false); go(idx - 1); }}>›</button>}
+          {n > 1 && <button type="button" className="pp-zoom-a next" aria-label={t('التالي')} onClick={() => { setBig(false); go(idx + 1); }}>‹</button>}
+          <div className="pp-zoom-sc" onClick={(e) => { if (e.target === e.currentTarget) setZoom(false); }}>
+            <img
+              src={list[idx]}
+              alt={`${name} ${idx + 1}`}
+              className={big ? 'big' : ''}
+              draggable={false}
+              onClick={() => setBig((b) => !b)}
+            />
+          </div>
+          <div className="pp-zoom-n" dir="ltr">{idx + 1} / {n}</div>
+        </div>
+      )}
+
+      {n > 1 && (
+        <div className="pp-thumbs">
+          {list.map((src, i) => (
+            <button
+              key={src + i}
+              type="button"
+              className={`pp-thumb ${i === idx ? 'on' : ''}`}
+              onClick={() => go(i)}
+              aria-label={`${t('صورة')} ${i + 1}`}
+            >
+              <img src={src} alt="" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-.pp-root * {
-  box-sizing: border-box;
-}
 
-.pp-page {
-  max-width: 520px;
-  margin: 0 auto;
-  padding: 14px 16px 150px;
-}
+const firstImg = (v) => { const a = Array.isArray(v) ? v : [v]; return a.find((x) => typeof x === 'string' && x) || ''; };
+const priceOf = (v) => Number(String(v).replace(/[^\d]/g, '')) || 0;
 
-.pp-back {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font: inherit;
-  color: var(--ink);
-  font-size: 15px;
-  margin-bottom: 10px;
-  padding: 0;
+/* منتجات مشابهة: من نفس العلامة أولاً ثم نفس الفئة */
+function Related({ product, slug }) {
+  const { t, money } = usePrefs();
+  const [list, setList] = useState([]);
+  useEffect(() => {
+    let off = false;
+    (async () => {
+      try {
+        const cols = 'slug,name,price,images';
+        let rows = [];
+        if (product.brand) {
+          const r = await supabase.from('watches').select(cols).eq('brand', product.brand).neq('slug', slug).limit(4);
+          if (Array.isArray(r.data)) rows = r.data;
+        }
+        if (rows.length < 4 && product.category) {
+          const r = await supabase.from('watches').select(cols).eq('category', product.category).neq('slug', slug).limit(8);
+          if (Array.isArray(r.data)) r.data.forEach((x) => { if (rows.length < 4 && !rows.some((y) => y.slug === x.slug)) rows.push(x); });
+        }
+        if (!off) setList(rows.filter((x) => x && typeof x.slug === 'string').slice(0, 4));
+      } catch { /* بدون مشابهة */ }
+    })();
+    return () => { off = true; };
+  }, [product.brand, product.category, slug]);
+  if (!list.length) return null;
+  return (
+    <section className="pp-rel" aria-label={t('منتجات مشابهة')}>
+      <h2>{t('منتجات مشابهة')}</h2>
+      <div className="pp-rel-grid">
+        {list.map((r) => (
+          <Link key={r.slug} className="pp-rel-card" to={`/order/${encodeURIComponent(r.slug)}`}>
+            <img src={firstImg(r.images)} alt={r.name} loading="lazy" decoding="async" />
+            <div><b>{r.name}</b><span>{money(priceOf(r.price))}</span></div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
 }
-
-.pp-img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 22px;
-  display: block;
-  box-shadow: 0 8px 22px rgba(0,0,0,.28);
-}
-
-.pp-title {
-  font-family: Georgia, serif;
-  font-size: 28px;
-  margin: 18px 0 2px;
-}
-
-.pp-price {
-  color: var(--gold);
-  font-size: 24px;
-  font-weight: bold;
-  margin: 0 0 6px;
-}
-
-.pp-desc {
-  margin: 0 0 18px;
-  line-height: 1.9;
-  color: var(--ink-soft);
-}
-
-.pp-card {
-  background: var(--glass);
-  border-radius: 22px;
-  padding: 18px;
-  box-shadow: 0 4px 16px rgba(0,0,0,.14);
-}
-
-.pp-card h2 {
-  margin: 0 0 14px;
-  text-align: center;
-  font-size: 19px;
-}
-
-.pp-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.pp-field {
-  position: relative;
-}
-
-.pp-field input,
-.pp-field select {
-  width: 100%;
-  padding: 22px 14px 8px;
-  border-radius: 14px;
-  border: 1.5px solid transparent;
-  background: var(--field);
-  color: var(--ink);
-  font: inherit;
-  font-size: 16px;
-  appearance: none;
-}
-
-.pp-field label {
-  position: absolute;
-  top: 15px;
-  right: 14px;
-  font-size: 15px;
-  color: var(--ink-soft);
-  pointer-events: none;
-  transition: all .15s;
-}
-
-.pp-field input:focus + label,
-.pp-field input:not(:placeholder-shown) + label,
-.pp-field select:focus + label,
-.pp-field select:valid + label {
-  top: 6px;
-  font-size: 11px;
-}
-
-.pp-field input:focus,
-.pp-field select:focus {
-  outline: none;
-  border-color: var(--ink);
-}
-
-.pp-field.bad input,
-.pp-field.bad select {
-  border-color: var(--error);
-}
-
-.pp-hint {
-  display: none;
-  color: var(--error);
-  font-size: 12px;
-  margin: 4px 6px 0;
-}
-
-.pp-field.bad .pp-hint {
-  display: block;
-}
-
-.pp-legend {
-  margin: 16px 0 8px;
-  font-weight: bold;
-}
-
-.pp-ship {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.pp-ship button {
-  font: inherit;
-  color: var(--ink);
-  background: var(--field);
-  border: 2px solid transparent;
-  border-radius: 16px;
-  padding: 14px 8px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.pp-ship button b {
-  display: block;
-  font-size: 16px;
-}
-
-.pp-ship button small {
-  display: block;
-  margin-top: 4px;
-  color: var(--gold);
-  font-size: 14px;
-}
-
-.pp-ship button[aria-pressed="true"] {
-  border-color: var(--ink);
-  background: var(--glass);
-  box-shadow: inset 0 0 0 1px var(--ink);
-}
-
-.pp-qty {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  font-size: 17px;
-}
-
-.pp-qty div {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.pp-qty button {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 12px;
-  background: var(--btn);
-  color: var(--btn-ink);
-  font-size: 22px;
-  cursor: pointer;
-}
-
-.pp-qty output {
-  min-width: 20px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.pp-sum {
-  margin-top: 16px;
-  border-top: 1px dashed var(--ink-soft);
-  padding-top: 12px;
-}
-
-.pp-sum p {
-  display: flex;
-  justify-content: space-between;
-  margin: 6px 0;
-  color: var(--ink-soft);
-}
-
-.pp-trust {
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: 14px;
-  margin: 16px 0 0;
-}
-
-.pp-toast {
-  text-align: center;
-  color: var(--gold);
-  font-weight: bold;
-  margin-top: 10px;
-  min-height: 22px;
-}
-
-.pp-chat {
-  position: fixed;
-  left: 12px;
-  bottom: 96px;
-  display: flex;
-  direction: ltr;
-  z-index: 5;
-}
-
-.pp-chat a {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 4px solid #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,.28);
-}
-
-.pp-chat .viber {
-  background: #7360f2;
-  position: relative;
-  z-index: 1;
-}
-
-.pp-chat .wa {
-  background: #4fce5d;
-  margin-left: -18px;
-}
-
-.pp-chat svg {
-  width: 30px;
-  height: 30px;
-  fill: #fff;
-}
-
-.pp-bar {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  background: var(--bg-deep);
-  border-top: 1px solid rgba(0,0,0,.12);
-  box-shadow: 0 -4px 16px rgba(0,0,0,.2);
-  padding: 12px 16px;
-  z-index: 4;
-}
-
-.pp-bar-in {
-  max-width: 520px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.pp-bar-total small {
-  display: block;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.pp-bar-total b {
-  font-size: 22px;
-  color: var(--gold);
-}
-
-.pp-order {
-  flex: 1;
-  border: none;
-  border-radius: 14px;
-  padding: 16px;
-  background: var(--btn);
-  color: var(--btn-ink);
-  font: inherit;
-  font-size: 19px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.pp-order:disabled {
-  opacity: .6;
-  cursor: wait;
-}
-`;
 
 function ProductPage() {
   const { productId } = useParams();
-  const navigate = useNavigate();
-
+  const { product, loading } = useProduct(productId);
+  const { t, money } = usePrefs();
+  const cart = useCart();
   const [qty, setQty] = useState(1);
-  const [place, setPlace] = useState('home');
-  const [errors, setErrors] = useState({});
-  const [done, setDone] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [colorSel, setColorSel] = useState('');
+  const [colorErr, setColorErr] = useState(false);
 
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    wilaya: '',
-    commune: ''
-  });
-
-  const raw = PRODUCTS.find(
-    (x) =>
-      String(x?.id ?? '').toLowerCase() ===
-      String(productId).toLowerCase()
-  );
-
-  if (!raw) {
-    return <h2 style={{ textAlign: 'center' }}>المنتج غير موجود</h2>;
-  }
-
-  const imgs = raw.images ?? raw.image ?? [];
-
-  const p = {
+  const raw = product;
+  const imgs = raw ? (raw.images ?? raw.image ?? []) : [];
+  const p = raw ? {
     ...raw,
+    desc: raw.desc ?? raw.bio ?? '',
     images: Array.isArray(imgs) ? imgs : [imgs],
-    price: Number(String(raw.price).replace(/[^\d]/g, '')) || 0,
-  };
+    price: priceOf(raw.price),
+  } : null;
 
-  const total = p.price * qty + DELIVERY[place];
+  const colors = p && Array.isArray(p.colors) ? p.colors.filter((c) => c && typeof c.name === 'string' && /^#[0-9a-fA-F]{6}$/.test(c.hex || '')) : [];
+  const chosen = colors.find((c) => c.name === colorSel) || null;
+  const items = p ? [{ slug: productId, name: p.name, price: p.price, qty, color: chosen ? chosen.name : undefined }] : [];
+  useSeo(p ? { title: `${p.name} | ISD +213`, description: (p.desc || '').slice(0, 160) || undefined, image: firstImg(p.images) || undefined } : {});
+  const needColor = colors.length > 0 && !chosen;
+  const co = useCheckout(items, undefined, () => { if (needColor) { setColorErr(true); try { document.querySelector('.pp-colors').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {} return false; } return true; });
 
-  const set = (k) => (e) =>
-    setForm({ ...form, [k]: e.target.value });
-
-  // إرسال الطلب إلى Google Sheets ثم فتح WhatsApp
-  const submit = async () => {
-    if (loading) return;
-
-    const validationErrors = {
-      name: form.name.trim().length < 2,
-      phone: !/^0[567]\d{8}$/.test(form.phone.trim()),
-      wilaya: !form.wilaya,
-    };
-
-    setErrors(validationErrors);
-
-    if (Object.values(validationErrors).some(Boolean)) {
-      setDone(false);
-      return;
+  useEffect(() => { setQty(1); setAdded(false); setColorSel(''); setColorErr(false); }, [productId]);
+  const viewed = useRef('');
+  useEffect(() => {
+    if (p && viewed.current !== productId) {
+      viewed.current = productId;
+      track('ViewContent', { id: productId, value: p.price });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p && p.id, productId]);
 
-    setLoading(true);
-    setDone(false);
+  if (loading) return <Skeleton />;
+  if (!p) return <p style={{ textAlign: 'center' }}>{t('المنتج غير متوفر')}</p>;
 
-    // تجهيز رسالة WhatsApp
-    const msg = [
-      'طلب جديد 🛒',
-      `المنتج: ${p.name}`,
-      `الكمية: ${qty}`,
-      `الاسم: ${form.name.trim()}`,
-      `الهاتف: ${form.phone.trim()}`,
-      `الولاية: ${form.wilaya}`,
-      `البلدية: ${form.commune || '-'}`,
-      `التوصيل: ${place === 'home' ? 'للمنزل' : 'لمكتب التوصيل'}`,
-      `سعر المنتجات: ${fmt(p.price * qty)}`,
-      `سعر التوصيل: ${fmt(DELIVERY[place])}`,
-      `السعر الإجمالي: ${fmt(total)}`,
-    ].join('\n');
-
-    // فتح نافذة مسبقاً لتجنب حظرها من المتصفح
-    const waWindow = window.open('about:blank', '_blank');
-
-    const data = {
-      product: p.name,
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      wilaya: form.wilaya,
-      commune: form.commune.trim(),
-      quantity: qty,
-      delivery: DELIVERY[place],
-      total: total,
-    };
-
-    try {
-      // إرسال البيانات إلى Google Sheets
-      await fetch(SHEET_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-        body: JSON.stringify(data),
-      });
-
-      setDone(true);
-
-      // الانتقال إلى WhatsApp
-      const whatsappURL =
-        `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
-
-      if (waWindow) {
-        waWindow.location.href = whatsappURL;
-      } else {
-        window.location.href = whatsappURL;
-      }
-
-    } catch (error) {
-      console.error('Order error:', error);
-
-      if (waWindow) {
-        waWindow.close();
-      }
-
-      alert('حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.');
-
-    } finally {
-      setLoading(false);
-    }
+  const addToCart = () => {
+    if (colors.length && !chosen) { setColorErr(true); return; }
+    cart.add({ slug: productId, name: p.name, price: p.price, image: firstImg(p.images), color: chosen ? chosen.name : '', hex: chosen ? chosen.hex : '' }, qty);
+    track('AddToCart', { id: productId, qty, value: p.price * qty });
+    setAdded(true);
   };
 
   return (
     <div className="pp-root" id={`product-${p.id}`}>
-      <style>{styles}</style>
+      <style>{ppStyles}</style>
 
       <main className="pp-page">
-
-        <button
-          className="pp-back"
-          onClick={() => navigate(-1)}
-        >
-          ← رجوع
-        </button>
-
-        <img
-          className="pp-img"
-          src={p.images[0]}
-          alt={p.name}
-        />
+        <Gallery key={p.id} images={p.images} name={p.name} />
 
         <h1 className="pp-title">{p.name}</h1>
-
-        <p className="pp-price">{fmt(p.price)}</p>
-
+        <p className="pp-price">{money(p.price)}</p>
         <p className="pp-desc">{p.desc}</p>
 
-        <section className="pp-card">
-
-          <h2>املأ الاستمارة للطلب</h2>
-
-          <div className="pp-row">
-
-            <div className={`pp-field ${errors.name ? 'bad' : ''}`}>
-              <input
-                id="pp-name"
-                placeholder=" "
-                value={form.name}
-                onChange={set('name')}
-                autoComplete="name"
-              />
-
-              <label htmlFor="pp-name">الاسم واللقب</label>
-
-              <div className="pp-hint">
-                اكتب اسمك الكامل
-              </div>
+        {colors.length > 0 && (
+          <section className={`pp-colors${colorErr && !chosen ? ' err' : ''}`} aria-label={t('اللون')}>
+            <div className="pp-colors-h"><b>{t('اللون')}</b>{chosen ? <span>{chosen.name}</span> : <span className="req">{t('اختر لوناً')}</span>}</div>
+            <div className="pp-sw" role="radiogroup">
+              {colors.map((c) => (
+                <button key={c.name} type="button" role="radio" aria-checked={chosen === c} className={`pp-swb${chosen === c ? ' on' : ''}`} onClick={() => { setColorSel(c.name); setColorErr(false); }}>
+                  <i style={{ background: c.hex }} /><span>{c.name}</span>
+                </button>
+              ))}
             </div>
+            {colorErr && !chosen ? <p className="pp-colerr" role="alert">{t('الرجاء اختيار اللون أولاً')}</p> : null}
+          </section>
+        )}
 
-            <div className={`pp-field ${errors.phone ? 'bad' : ''}`}>
-              <input
-                id="pp-phone"
-                type="tel"
-                inputMode="numeric"
-                placeholder=" "
-                value={form.phone}
-                onChange={set('phone')}
-                autoComplete="tel"
-              />
-
-              <label htmlFor="pp-phone">رقم الهاتف</label>
-
-              <div className="pp-hint">
-                مثال: 0555123456
-              </div>
-            </div>
-
-          </div>
-
-          <div className="pp-row">
-
-            <div className={`pp-field ${errors.wilaya ? 'bad' : ''}`}>
-              <select
-                id="pp-wilaya"
-                required
-                value={form.wilaya}
-                onChange={set('wilaya')}
-              >
-                <option value="" hidden></option>
-
-                {WILAYAS.map((w, i) => (
-                  <option key={w} value={w}>
-                    {i + 1} - {w}
-                  </option>
-                ))}
-              </select>
-
-              <label htmlFor="pp-wilaya">الولاية</label>
-
-              <div className="pp-hint">
-                اختر ولايتك
-              </div>
-            </div>
-
-            <div className="pp-field">
-              <input
-                id="pp-commune"
-                placeholder=" "
-                value={form.commune}
-                onChange={set('commune')}
-              />
-
-              <label htmlFor="pp-commune">البلدية</label>
-            </div>
-
-          </div>
-
-          <div className="pp-legend">
-            مكان التوصيل
-          </div>
-
-          <div className="pp-ship">
-
-            <button
-              type="button"
-              aria-pressed={place === 'home'}
-              onClick={() => setPlace('home')}
-            >
-              <b>🏠 للمنزل</b>
-              <small>{fmt(DELIVERY.home)}</small>
-            </button>
-
-            <button
-              type="button"
-              aria-pressed={place === 'office'}
-              onClick={() => setPlace('office')}
-            >
-              <b>🏢 لمكتب التوصيل</b>
-              <small>{fmt(DELIVERY.office)}</small>
-            </button>
-
-          </div>
-
+        <CheckoutCard co={co}>
           <div className="pp-qty">
-
-            <span>الكمية</span>
-
+            <span>{t('الكمية')}</span>
             <div>
-
-              <button
-                type="button"
-                aria-label="زيادة"
-                onClick={() => setQty(qty + 1)}
-              >
-                +
-              </button>
-
+              <button type="button" aria-label={t('زيادة')} onClick={() => setQty(Math.min(20, qty + 1))}>+</button>
               <output>{qty}</output>
-
-              <button
-                type="button"
-                aria-label="نقصان"
-                onClick={() => setQty(Math.max(1, qty - 1))}
-              >
-                −
-              </button>
-
+              <button type="button" aria-label={t('نقصان')} onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
             </div>
           </div>
+          <button type="button" className="pp-addcart" onClick={addToCart}>🛒 {t('أضف إلى السلة')}</button>
+          {added ? <p className="pp-added" role="status">{t('تمت الإضافة إلى السلة')} · <Link to="/cart">{t('عرض السلة')}</Link></p> : null}
+        </CheckoutCard>
 
-          <div className="pp-sum">
+        <CheckoutBar co={co} />
 
-            <p>
-              <span>سعر المنتجات</span>
-              <span>{fmt(p.price * qty)}</span>
-            </p>
-
-            <p>
-              <span>سعر التوصيل</span>
-              <span>{fmt(DELIVERY[place])}</span>
-            </p>
-
-          </div>
-
-        </section>
-
-        <p className="pp-trust">
-          الدفع عند الاستلام، والتوصيل لكل الولايات
-        </p>
+        <p className="pp-trust">{t('الدفع عند الاستلام، والتوصيل لكل الولايات')}</p>
 
         <div className="pp-toast" role="status">
-          {done ? 'تم إرسال بيانات الطلب، أكمل الإرسال من واتساب ✓' : ''}
+          {co.done ? t('تم استلام طلبك ✓') : ''}
         </div>
 
+        <ProductReviews slug={productId} />
+
+        <Related product={p} slug={productId} />
       </main>
 
       {/* أزرار التواصل */}
 
-      <nav className="pp-chat" aria-label="تواصل معنا">
+      <nav className="pp-chat" aria-label={t("تواصل معنا")}>
 
         <a
           className="viber"
@@ -689,29 +291,6 @@ function ProductPage() {
         </a>
 
       </nav>
-
-      {/* شريط الطلب السفلي */}
-
-      <div className="pp-bar">
-
-        <div className="pp-bar-in">
-
-          <div className="pp-bar-total">
-            <small>التكلفة الإجمالية</small>
-            <b>{fmt(total)}</b>
-          </div>
-
-          <button
-            className="pp-order"
-            onClick={submit}
-            disabled={loading}
-          >
-            {loading ? 'جارٍ إرسال الطلب...' : 'اطلب الآن'}
-          </button>
-
-        </div>
-
-      </div>
 
     </div>
   );

@@ -166,7 +166,7 @@ export const PRODUCTS=[
     
 },
 //BOSS/
-{ id: 'boss1',
+{ id: 'boos1',
     name:'BOSS',
     price: 28000 ,
     image:['/ROLEXM/BOSSDOI.jpg'],

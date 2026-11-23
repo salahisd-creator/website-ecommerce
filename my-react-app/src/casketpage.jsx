@@ -1,13 +1,21 @@
 import React from 'react';
+import { usePrefs } from './prefs';
 import { Link } from 'react-router-dom';
+import { useWatches } from './useWatches';
+import { CardActions, cardStyles, useFavs } from './ProductCard1';
+import { useAdmin } from './useAdmin';
+import {AddProductCard} from './AddProuductCard'
+import Skeleton from './Skeleton';
 
-const styles = `
+const styles = ` 
+
 .cs-list {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 32px;
-  padding: 30px 20px 60px;
+  padding: 30px 20px 0;
+  
 }
 a.cs-card {
   display: flex;
@@ -21,7 +29,7 @@ a.cs-card {
   border-radius: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   text-decoration: none;
-  color: #3b2a1a;
+  color: var(--c-d1);
   transition: transform 0.25s, box-shadow 0.25s;
   box-sizing: border-box;
 }
@@ -36,7 +44,6 @@ a.cs-card img {
   max-width: 220px;
   height: auto;
   object-fit: cover;
-  border-radius: 0;
 }
 .cs-info {
   flex: 1;
@@ -46,8 +53,8 @@ a.cs-card img {
   padding: 20px 22px;
   text-align: center;
 }
-.cs-info h3 { margin: 0 0 12px; font-size: 24px; color: #3b2a1a; }
-.cs-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: #3b2a1a; }
+.cs-info h3 { margin: 0 0 12px; font-size: 24px; color: var(--c-d1); }
+.cs-info p  { margin: 0; font-size: 16px; line-height: 1.7; color: var(--c-d1); }
 @media (max-width: 560px) {
   a.cs-card { flex-direction: column; }
   a.cs-card img { width: 100%; min-width: 0; max-width: 100%; height: 200px; }
@@ -55,45 +62,33 @@ a.cs-card img {
 `;
 
 function Casketpage() {
+  const { t } = usePrefs();
+  const { watches, loading } = useWatches("caps");
+  const { favs, toggleFav } = useFavs();
+    const isAdmin = useAdmin();
+  
+  if (loading) return <Skeleton />;
+
   return (
-    <div>
+    <div className='Casketpagebody'>
       <style>{styles}</style>
-      <div className="cs-list">
-        <Link to="/order/prada" className="cs-card">
-          <img src="/Casketimages/pradaimg.jpg" alt="PRADA" />
-          <div className="cs-info">
-            <h3>PRADA</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="cs-list">
-        <Link to="/order/burberry" className="cs-card">
-          <img src="/Casketimages/burberryimg.jpg" alt="Burberry" />
-          <div className="cs-info">
-            <h3>BURBERY</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="cs-list">
-        <Link to="/order/Burbery2" className="cs-card">
-          <img src="/Casketimages/burberryimg2.jpg" alt="Burbery" />
-          <div className="cs-info">
-            <h3>BURBERY</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
-      <div className="cs-list">
-        <Link to="/order/Hermes" className="cs-card">
-          <img src="/Casketimages/hermesimg.jpg" alt="Hermes" />
-          <div className="cs-info">
-            <h3>HERMES</h3>
-            <p>Prada glasses, high quality and elegant design.</p>
-          </div>
-        </Link>
-      </div>
+      <style>{cardStyles}</style>
+      {isAdmin && (
+       <div className="sack-list">
+        <AddProductCard to="/add-product" />
+       </div>)}
+      {watches.map((w) => (
+        <div className="cs-list" key={w.id}>
+          <Link to={`/order/${w.slug}`} className="cs-card">
+            <img src={w.images?.[0]} alt={w.name} loading="lazy" decoding="async" />
+            <div className="cs-info">
+              <h3>{w.name}</h3>
+              <p>{w.bio}</p>
+              <CardActions price={w.price} id={w.slug} favs={favs} toggleFav={toggleFav} />
+            </div>
+          </Link>
+        </div>
+      ))}
     </div>
   );
 }
